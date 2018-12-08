@@ -4,8 +4,8 @@ const Alexa = require('ask-sdk');
 const skillBuilder = Alexa.SkillBuilders.standard();
 const Axios = require('axios')
 
-const SKILL_NAME = 'Test Alarm';
-const HELP_MESSAGE = 'You can say set alarm, or, you can say exit... What can I help you with?';
+const SKILL_NAME = 'Backtimer';
+const HELP_MESSAGE = 'You can say "plan a meal", or, you can say "exit"... What can I help you with?';
 const HELP_REPROMPT = 'What can I help you with?';
 const STOP_MESSAGE = 'Goodbye!';
 
