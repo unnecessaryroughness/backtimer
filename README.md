@@ -19,7 +19,7 @@ The process is essentially the same for both modes; just the terminology changes
 7.  "yes" 
 8.       "What is your next activity/ingredient?"
 9.  "abc"
-10.       "And how long will xyz take to complete/cook?"
+10.       "And how long will abc take to complete/cook?"
 11.  "mm minutes"
 12.       "Ok. Would you like to add another activity/ingredient?"
 13.  "no"
