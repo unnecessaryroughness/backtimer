@@ -60,7 +60,7 @@ functions:
   backtimer:
     handler: index.handler
     events:
-      - alexaSkill: xxxxxx
+      - alexaSkill: amzn1.ask.skill.4eb8b408-5d55-41d2-b666-57879662ae3c
 
 #    The following are a few example events you can configure
 #    NOTE: Please make sure to change your handler code to work with those events
