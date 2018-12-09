@@ -34,7 +34,6 @@ The process is essentially the same for both modes; just the terminology changes
           "Is that ok?"
 17.  "yes" 
 18.       "Ok. I have saved this meal plan for you. When you are ready to start, say Alexa ask backtimer to start xyz"
-...
 19.  "Alexa, ask backtimer to start xyz"
 20.       "Ok. I have set r reminders for you"
           "xyz, in nn minutes"
