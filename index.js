@@ -4,6 +4,9 @@ const Alexa = require('ask-sdk');
 const skillBuilder = Alexa.SkillBuilders.standard();
 const Axios = require('axios')
 
+const backtimer = require('./backtimer.js')
+const speechResponses = require('./speechresponses')
+
 const SKILL_NAME = 'Backtimer';
 const HELP_MESSAGE = 'You can say "plan a meal", or, you can say "exit"... What can I help you with?';
 const HELP_REPROMPT = 'What can I help you with?';
@@ -74,6 +77,25 @@ const SetAlarmHandler = {
     }
 };
 
+
+const SetBacktimerHandler = {
+  canHandle(handlerInput) {
+    let request = handlerInput.requestEnvelope.request;
+    return request.type === 'IntentRequest'
+      && ['SetMealTimer','SetBackTimer'].includes(request.intent.name);
+  },
+  handle(handlerInput) {
+    let request = handlerInput.requestEnvelope.request;
+    let intentSpeechResponses = speechResponses(request.intent.name)
+    console.log(JSON.stringify(intentSpeechResponses, null, 2))
+    return handlerInput.responseBuilder
+      .speak(`this is the ${request.intent.name} handler`)
+      .withSimpleCard(SKILL_NAME, `$(request.intent.name)`)
+      .getResponse();
+  }
+}
+
+
 const HelpHandler = {
   canHandle(handlerInput) {
     const request = handlerInput.requestEnvelope.request;
@@ -131,6 +153,7 @@ const ErrorHandler = {
 exports.handler = skillBuilder
   .addRequestHandlers(
     SetAlarmHandler,
+    SetBacktimerHandler,
     HelpHandler,
     ExitHandler,
     SessionEndedRequestHandler
