@@ -28,8 +28,14 @@ module.exports = (intentType) => {
     },
     speeches: {
       REQ_ACTIVITY_NAME: "Ok. What is your {{var.0}} {{noun.0}}? Say: 'Add', followed by your {{noun.0}} name",
-      REQ_ACTIVITY_DURATION: "And how long will {{var.0}} take to {{verb.0}}?",
-      REQ_ADD_ANOTHER_PROMPT: "Ok. Would you like to add another {{noun.0}}?"
+      REQ_ACTIVITY_DURATION: "And how long in minutes will {{var.0}} take to {{verb.0}}?",
+      REQ_ACTIVITY_CONFIRMATION: "Ok, I have {{var.0}} {{verb.1}} for {{var.1}} minutes. ",
+      REQ_ADD_ANOTHER_PROMPT: "Would you like to add another {{noun.0}}?",
+      TELL_LONGEST_ACTIVITY: "Ok. The longest {{noun.0}} to {{verb.0}} is {{var.0}} that will take {{var.1}} minutes.",
+      TELL_SECOND_STARTER: "After starting {{var.0}} you should wait {{var.1}} minutes and then start {{var.2}}.",
+      TELL_SUBSEQUENT_STARTER: "Then wait {{var.0}} more minutes and then start {{var.1}}.",
+      TELL_FOOTER: "If you follow these instructions then everything should be completed at the same time.",
+      REQ_SET_REMINDERS: "Would you like me to set reminders for the start of each activity?"
     },
     parse (reqSpeech, varList=[]) {
       let base = (this.speeches[reqSpeech]) ? this.speeches[reqSpeech] : "Speech Undefined"
@@ -52,10 +58,12 @@ module.exports = (intentType) => {
     timerSpeech.subs.nouns[0] = 'ingredient'
     timerSpeech.subs.nouns[1] = 'meal plan'
     timerSpeech.subs.verbs[0] = 'cook'
+    timerSpeech.subs.verbs[1] = 'cooking'
   } else {
     timerSpeech.subs.nouns[0] = 'activity'
     timerSpeech.subs.nouns[1] = 'schedule'
     timerSpeech.subs.verbs[0] = 'complete'
+    timerSpeech.subs.verbs[1] = 'running'
   }
   return timerSpeech
 }

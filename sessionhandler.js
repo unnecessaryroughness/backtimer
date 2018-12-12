@@ -21,22 +21,33 @@
 */
 
 let sessionAttributesTemplate = {
-    activityIndex: 0,
-    activityList: [{}],
-    updateActivityList (activityName, activityDuration) {
-        console.log(JSON.stringify(this.activityList), this.activityIndex)
-        if (activityName) this.activityList[this.activityIndex].name = activityName
-        if (activityDuration) this.activityList[this.activityIndex].duration = activityDuration
+    activityList: [{name: '', duration: ''}],
+    intentType: '',
+    breadcrumbs: [],
+    updateActivity (activityName, activityDuration) {
+        console.log(JSON.stringify(this.activityList))
+        if (activityName) this.activityList[this.activityList.length -1].name = activityName
+        if (activityDuration) this.activityList[this.activityList.length -1].duration = activityDuration
         return this
     },
-    incrementActivityIndex () {
-        this.activityList.push({})
-        this.activityIndex = this.activityList.length -1 
+    addActivity () {
+        this.activityList.push({name: '', duration: ''})
         return this
     },
-    reset () {
+    reset (intentType) {
         this.activityList = [{}]
-        this.activityIndex = this.activityList.length -1
+        this.intentType = intentType
+        return this
+    },
+    addBreadcrumb (breadcrumb) {
+        this.breadcrumbs.push(breadcrumb)
+        return this
+    },
+    getNewest () {
+        return this.activityList[this.activityList.length -1] 
+    },
+    getNewestBreadcrumb () {
+        return this.breadcrumbs[this.breadcrumbs.length -1]
     },
     stringify () {
        return JSON.stringify(this.activityList, null, 2)
@@ -46,7 +57,7 @@ let sessionAttributesTemplate = {
 const getSession = (handlerInput) => {
     let sessionAttributes = handlerInput.attributesManager.getSessionAttributes()
     if (!sessionAttributes.activityIndex) {
-    sessionAttributes = sessionAttributesTemplate
+        sessionAttributes = sessionAttributesTemplate
     }
     return sessionAttributes
 }

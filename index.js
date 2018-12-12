@@ -16,67 +16,67 @@ const STOP_MESSAGE = 'Goodbye!';
 const REMINDER_ENDPOINT = '/v1/alerts/reminders'
 
 
-const callAPI = (token, url, payload = null) => new Promise((resolve, reject) => {
-  if (!token) reject(new Error('Error calling URL - user is not logged in'))
-  if (!url) reject(new Error('Error calling URL - missing URL string'))
-  let config = {
-    url: url,
-    method: 'post',
-    headers: {'Authorization': 'bearer ' + token, 
-              'Content-Type': 'application/json'},
-    data: payload
-  }
-  console.log('API Call Configuration -->', config)
-  Axios.request(config)
-    .then((response) => resolve(response))
-    .catch((error) => reject(error))
-})
+// const callAPI = (token, url, payload = null) => new Promise((resolve, reject) => {
+//   if (!token) reject(new Error('Error calling URL - user is not logged in'))
+//   if (!url) reject(new Error('Error calling URL - missing URL string'))
+//   let config = {
+//     url: url,
+//     method: 'post',
+//     headers: {'Authorization': 'bearer ' + token, 
+//               'Content-Type': 'application/json'},
+//     data: payload
+//   }
+//   console.log('API Call Configuration -->', config)
+//   Axios.request(config)
+//     .then((response) => resolve(response))
+//     .catch((error) => reject(error))
+// })
 
 
 
-const SetAlarmHandler = {
-    canHandle(handlerInput) {
-        const request = handlerInput.requestEnvelope.request;
-        return request.type === 'LaunchRequest'
-          || (request.type === 'IntentRequest'
-          && request.intent.name === 'setAlarm')
-    },
-    handle(handlerInput) {
-      let currentTime = new Date();
-      let useBody = {
-          requestTime : currentTime.toISOString(),
-          trigger: {
-               type : "SCHEDULED_RELATIVE",
-               offsetInSeconds : 30,
-          },
-          alertInfo: {
-               spokenInfo: {
-                   content: [{
-                       locale: "en-US", 
-                       text: "test the reminder function"
-                   }]
-               }
-           },
-           pushNotification : {                            
-                status : "ENABLED"         
-           }
-        }
-      let endpoint = handlerInput.requestEnvelope.context.System.apiEndpoint  
+// const SetAlarmHandler = {
+//     canHandle(handlerInput) {
+//         const request = handlerInput.requestEnvelope.request;
+//         return request.type === 'LaunchRequest'
+//           || (request.type === 'IntentRequest'
+//           && request.intent.name === 'setAlarm')
+//     },
+//     handle(handlerInput) {
+//       let currentTime = new Date();
+//       let useBody = {
+//           requestTime : currentTime.toISOString(),
+//           trigger: {
+//                type : "SCHEDULED_RELATIVE",
+//                offsetInSeconds : 30,
+//           },
+//           alertInfo: {
+//                spokenInfo: {
+//                    content: [{
+//                        locale: "en-US", 
+//                        text: "test the reminder function"
+//                    }]
+//                }
+//            },
+//            pushNotification : {                            
+//                 status : "ENABLED"         
+//            }
+//         }
+//       let endpoint = handlerInput.requestEnvelope.context.System.apiEndpoint  
       
-      callAPI(handlerInput.requestEnvelope.context.System.apiAccessToken, endpoint + REMINDER_ENDPOINT, useBody)
-        .then(apiResult => {
-          console.log('successfully added reminder', apiResult)
-        })
-        .catch(apiErr => {
-          console.log('oh bugger - an error occurred ->', apiErr)
-        })
+//       callAPI(handlerInput.requestEnvelope.context.System.apiAccessToken, endpoint + REMINDER_ENDPOINT, useBody)
+//         .then(apiResult => {
+//           console.log('successfully added reminder', apiResult)
+//         })
+//         .catch(apiErr => {
+//           console.log('oh bugger - an error occurred ->', apiErr)
+//         })
 
-      return handlerInput.responseBuilder
-        .speak('I have attempted to add a reminder')
-        .withSimpleCard(SKILL_NAME, 'reminder requested')
-        .getResponse();
-    }
-};
+//       return handlerInput.responseBuilder
+//         .speak('I have attempted to add a reminder')
+//         .withSimpleCard(SKILL_NAME, 'reminder requested')
+//         .getResponse();
+//     }
+// };
 
 
 const SetBacktimerHandler = {
@@ -88,12 +88,13 @@ const SetBacktimerHandler = {
   handle(handlerInput) {
     let request = handlerInput.requestEnvelope.request;
     let sessionAttributes = sessionHandler.getSession(handlerInput)
-    let intentSpeechResponses = speechResponses(request.intent.name)
-    let speechText = intentSpeechResponses.parse('REQ_ACTIVITY_NAME', ['first'])
-    console.log('speechText: ', speechText)
     
-    sessionAttributes.reset()
-    console.log(sessionAttributes.stringify())
+    sessionAttributes
+      .reset(request.intent.name)
+      .addBreadcrumb('Init')
+    
+    let speechText = speechResponses(sessionAttributes.intentType).parse('REQ_ACTIVITY_NAME', ['first'])
+
     sessionHandler.updateSession(handlerInput, sessionAttributes)
 
     return handlerInput.responseBuilder
@@ -114,9 +115,16 @@ const ActivityTypeHandler = {
   handle(handlerInput) {
     let request = handlerInput.requestEnvelope.request
     let sessionAttributes = sessionHandler.getSession(handlerInput)
-    let intentSpeechResponses = speechResponses(request.intent.name)
+    let intentSpeechResponses = speechResponses(sessionAttributes.intentType)
+    let activityFound = request.intent.slots.ActivityType.value
+  
+    sessionAttributes
+      .updateActivity(activityFound)
+      .addBreadcrumb(`Activity Type`)
+    
+    sessionHandler.updateSession(handlerInput, sessionAttributes)
 
-    let speechText = "temporary message for activity type handlers"
+    let speechText = intentSpeechResponses.parse('REQ_ACTIVITY_DURATION', [activityFound])
 
     return handlerInput.responseBuilder
       .speak(speechText)
@@ -125,6 +133,73 @@ const ActivityTypeHandler = {
       .getResponse()
   }
 }
+
+
+const ActivityDurationHandler = {
+  canHandle(handlerInput) {
+    let request = handlerInput.requestEnvelope.request;
+    return request.type === 'IntentRequest'
+      && request.intent.name === 'ActivityDurationIntent'
+  },
+  handle(handlerInput) {
+    let request = handlerInput.requestEnvelope.request
+    let sessionAttributes = sessionHandler.getSession(handlerInput)
+    let intentSpeechResponses = speechResponses(sessionAttributes.intentType)
+    let minutesFound = request.intent.slots.Minutes.value
+  
+  sessionAttributes 
+    .updateActivity(null, minutesFound)
+    .addBreadcrumb(`Duration`)
+  
+  sessionHandler.updateSession(handlerInput, sessionAttributes)
+  
+  let {name, duration} = sessionAttributes.getNewest()
+  let speechText = intentSpeechResponses.parse('REQ_ACTIVITY_CONFIRMATION', [name, duration]) + 
+                    intentSpeechResponses.parse('REQ_ADD_ANOTHER_PROMPT') 
+  
+    return handlerInput.responseBuilder
+      .speak(speechText)
+      .reprompt(speechText)
+      .withSimpleCard(SKILL_NAME, speechText)
+      .getResponse()
+  }
+}
+
+
+const YesHandler = {
+  canHandle(handlerInput) {
+    const request = handlerInput.requestEnvelope.request;
+    return request.type === 'IntentRequest'
+      && request.intent.name === 'AMAZON.YesIntent';
+  },
+  handle(handlerInput) {
+    let request = handlerInput.requestEnvelope.request
+    let sessionAttributes = sessionHandler.getSession(handlerInput)
+    let intentSpeechResponses = speechResponses(sessionAttributes.intentType)
+    let previousBreadcrumb = sessionAttributes.getNewestBreadcrumb() 
+    let speechText = 'placeholder'
+  
+  if (previousBreadcrumb === 'Duration') {
+    sessionAttributes
+      .addBreadcrumb(`Add Another Activity Type`)
+      .addActivity()
+    
+    speechText = intentSpeechResponses.parse('REQ_ACTIVITY_NAME', ['next'])
+  } else {
+    // sessionAttributes.addBreadcrumb(`Confirm Reminders`)
+    // speechText = speechResponses(sessionAttributes.intentType).parse('TELL_LONGEST_ACTIVITY', ['test activity', '5'])      
+  }
+  
+  sessionHandler.updateSession(handlerInput, sessionAttributes)
+  
+    return handlerInput.responseBuilder
+      .speak(speechText)
+      .reprompt(speechText)
+      .withSimpleCard(SKILL_NAME, speechText)
+      .getResponse();
+  }
+}
+
 
 const HelpHandler = {
   canHandle(handlerInput) {
@@ -182,9 +257,10 @@ const ErrorHandler = {
 
 exports.handler = skillBuilder
   .addRequestHandlers(
-    SetAlarmHandler,
     SetBacktimerHandler,
     ActivityTypeHandler,
+    ActivityDurationHandler,
+    YesHandler,
     HelpHandler,
     ExitHandler,
     SessionEndedRequestHandler
