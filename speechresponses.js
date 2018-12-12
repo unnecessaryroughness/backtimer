@@ -31,11 +31,11 @@ module.exports = (intentType) => {
       REQ_ACTIVITY_DURATION: "And how long in minutes will {{var.0}} take to {{verb.0}}?",
       REQ_ACTIVITY_CONFIRMATION: "Ok, I have {{var.0}} {{verb.1}} for {{var.1}} minutes. ",
       REQ_ADD_ANOTHER_PROMPT: "Would you like to add another {{noun.0}}?",
-      TELL_LONGEST_ACTIVITY: "Ok. The longest {{noun.0}} to {{verb.0}} is {{var.0}} that will take {{var.1}} minutes.",
-      TELL_SECOND_STARTER: "After starting {{var.0}} you should wait {{var.1}} minutes and then start {{var.2}}.",
-      TELL_SUBSEQUENT_STARTER: "Then wait {{var.0}} more minutes and then start {{var.1}}.",
-      TELL_FOOTER: "If you follow these instructions then everything should be completed at the same time.",
-      REQ_SET_REMINDERS: "Would you like me to set reminders for the start of each activity?"
+      TELL_LONGEST_ACTIVITY: "Ok. The longest {{noun.0}} to {{verb.0}}, is {{var.0}}, that will take {{var.1}} minutes. ",
+      TELL_SECOND_STARTER: "After starting {{var.0}}, you should wait {{var.1}} minutes, and then start {{var.2}}. ",
+      TELL_SUBSEQUENT_STARTER: "Then wait {{var.0}} more minutes, before starting {{var.1}}. ",
+      TELL_FOOTER: "If you follow these instructions then everything should be completed at the same time. ",
+      REQ_SET_REMINDERS: "Would you like me to set reminders for the start of each activity? "
     },
     parse (reqSpeech, varList=[]) {
       let base = (this.speeches[reqSpeech]) ? this.speeches[reqSpeech] : "Speech Undefined"

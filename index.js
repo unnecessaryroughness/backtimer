@@ -12,7 +12,7 @@ const SKILL_NAME = 'Backtimer';
 const HELP_MESSAGE = 'You can say "plan a meal", or, you can say "exit"... What can I help you with?';
 const HELP_REPROMPT = 'What can I help you with?';
 const STOP_MESSAGE = 'Goodbye!';
-
+const UNHANDLED_MESSAGE = "I didn't understand that instruction. Did you mean to say, Add, before giving an ingredient name?"
 const REMINDER_ENDPOINT = '/v1/alerts/reminders'
 
 
@@ -179,18 +179,18 @@ const YesHandler = {
     let previousBreadcrumb = sessionAttributes.getNewestBreadcrumb() 
     let speechText = 'placeholder'
   
-  if (previousBreadcrumb === 'Duration') {
-    sessionAttributes
-      .addBreadcrumb(`Add Another Activity Type`)
-      .addActivity()
+    if (previousBreadcrumb === 'Duration') {
+      sessionAttributes
+        .addBreadcrumb(`Add Another Activity Type`)
+        .addActivity()
+      
+      speechText = intentSpeechResponses.parse('REQ_ACTIVITY_NAME', ['next'])
+    } else {
+      // sessionAttributes.addBreadcrumb(`Confirm Reminders`)
+      // speechText = speechResponses(sessionAttributes.intentType).parse('TELL_LONGEST_ACTIVITY', ['test activity', '5'])      
+    }
     
-    speechText = intentSpeechResponses.parse('REQ_ACTIVITY_NAME', ['next'])
-  } else {
-    // sessionAttributes.addBreadcrumb(`Confirm Reminders`)
-    // speechText = speechResponses(sessionAttributes.intentType).parse('TELL_LONGEST_ACTIVITY', ['test activity', '5'])      
-  }
-  
-  sessionHandler.updateSession(handlerInput, sessionAttributes)
+    sessionHandler.updateSession(handlerInput, sessionAttributes)
   
     return handlerInput.responseBuilder
       .speak(speechText)
@@ -199,6 +199,59 @@ const YesHandler = {
       .getResponse();
   }
 }
+
+
+const NoHandler = {
+  canHandle(handlerInput) {
+    const request = handlerInput.requestEnvelope.request;
+    return request.type === 'IntentRequest'
+      && request.intent.name === 'AMAZON.NoIntent';
+  },
+  handle(handlerInput) {
+    let request = handlerInput.requestEnvelope.request
+    let sessionAttributes = sessionHandler.getSession(handlerInput)
+    let intentSpeechResponses = speechResponses(sessionAttributes.intentType)
+    let previousBreadcrumb = sessionAttributes.getNewestBreadcrumb() 
+    let speechText = 'placeholder'
+  
+    if (previousBreadcrumb === 'Duration') {
+      sessionAttributes
+        .addBreadcrumb(`No More Activity Types`)
+        
+      let schedule = backtimer(sessionAttributes.activityList)
+      let longest = schedule.longestActivity
+      
+      console.log(schedule)
+
+      speechText =  intentSpeechResponses.parse('TELL_LONGEST_ACTIVITY', [longest.name, longest.duration])
+      if (schedule.activities.length > 1) {
+        let second = schedule.activities[1]
+        speechText += intentSpeechResponses.parse('TELL_SECOND_STARTER', [longest.name, second.countdown, second.name])
+      }
+      if (schedule.activities.length > 2) {
+        for (let i = 2; i < schedule.activities.length; i++) {
+          let current = schedule.activities[i]
+          speechText += intentSpeechResponses.parse('TELL_SUBSEQUENT_STARTER', [current.countdown, current.name])
+        }
+      }
+      speechText += intentSpeechResponses.parse('TELL_FOOTER')
+      speechText += intentSpeechResponses.parse('REQ_SET_REMINDERS')
+    } else {
+      // sessionAttributes.addBreadcrumb(`Confirm Reminders`)
+      // speechText = speechResponses(sessionAttributes.intentType).parse('TELL_LONGEST_ACTIVITY', ['test activity', '5'])      
+    }
+    
+    sessionHandler.updateSession(handlerInput, sessionAttributes)
+  
+    return handlerInput.responseBuilder
+      .speak(speechText)
+      .reprompt(speechText)
+      .withSimpleCard(SKILL_NAME, speechText)
+      .getResponse();
+  }
+}
+
+
 
 
 const HelpHandler = {
@@ -255,15 +308,30 @@ const ErrorHandler = {
   },
 };
 
+const UnhandledHandler = {
+  canHandle(handlerInput) {
+    return true
+  },
+  handle(handlerInput) {
+    return handlerInput.responseBuilder
+      .speak(UNHANDLED_MESSAGE)
+      .reprompt(UNHANDLED_MESSAGE)
+      .getResponse();
+  },
+};
+
+
 exports.handler = skillBuilder
   .addRequestHandlers(
     SetBacktimerHandler,
     ActivityTypeHandler,
     ActivityDurationHandler,
     YesHandler,
+    NoHandler,
     HelpHandler,
     ExitHandler,
-    SessionEndedRequestHandler
+    SessionEndedRequestHandler, 
+    UnhandledHandler
   )
   .addErrorHandlers(ErrorHandler)
   .lambda();

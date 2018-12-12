@@ -3,28 +3,32 @@
     ============
 
     Purpose: 
-        * Accepts a list of arbitrary ingredients with cooking durations
-            - each ingredient is an object of form {name: xxx, duration: nnn}
-        * Sorts by descending cooking duration
-        * Determines how long to wait after the first ingredient before starting to cook all other ingredients 
+        * Accepts a list of arbitrary activities with durations
+            - each activity is an object of form {name: xxx, duration: nnn}
+        * Sorts by descending duration
+        * Determines how long to wait after the first activity before starting to complete all other activities 
 
     Returns: 
         * Object: 
-            - longestIngredient: (object)
-            - ingredients: (list of objects)
+            - longestActivity: (object)
+            - activities: (list of objects)
 */
 
-module.exports = (ingredients) => {
-    ingredients = ingredients.sort((a, b) => a.duration > b.duration ? -1 : 1)
-    let longestIngredient = ingredients[0]
-    ingredients = ingredients.map(ingredient => {
+module.exports = (activities) => {
+    activities = activities.sort((a, b) => parseInt(a.duration) > parseInt(b.duration) ? -1 : 1)
+    let longestActivity = activities[0]
+    let prevDuration = longestActivity.duration 
+    activities = activities.map(activity => {
+        countdown = prevDuration - activity.duration
+        prevDuration = activity.duration
         return {
-            ...ingredient,
-            startsects: (longestIngredient.duration - ingredient.duration) * 60
+            ...activity,
+            startsecs: (longestActivity.duration - activity.duration) * 60,
+            countdown
         }
     })
     return {
-        longestIngredient,
-        ingredients
+        longestActivity,
+        activities
     }
 }

@@ -3,13 +3,13 @@ bt = require("./backtimer")
 console.log("\n+++++++++++++++++++++\n")
 
 let output = bt([
-    {name: "pear", duration: 8}, 
-    {name: "apple", duration: 4}, 
-    {name: "banana", duration: 10}
+    {name: "pizza", duration: '12'}, 
+    {name: "chips", duration: '22'}, 
+    {name: "beans", duration: '5'}
 ])
 
-console.log(output.ingredients)
-console.log(`\ntotal cooking time is: ${output.longestIngredient.duration} minutes`)
-console.log(`\nlongest ingredient to cook is: ${output.longestIngredient.name}`)
+console.log(output.activities)
+console.log(`\ntotal duration is: ${output.longestActivity.duration} minutes`)
+console.log(`\nlongest activity to complete is: ${output.longestActivity.name}`)
 
 console.log("\n+++++++++++++++++++++\n")
