@@ -27,20 +27,23 @@ module.exports = (intentType) => {
       verbs: [] 
     },
     speeches: {
-      REQ_FIRST_ACTIVITY: "Ok. What is your first {{noun.0}}?",
-      REQ_FIRST_DURATION: "And how long will {{var.0}} take to {{verb.0}}?",
+      REQ_ACTIVITY_NAME: "Ok. What is your {{var.0}} {{noun.0}}? Say: 'Add', followed by your {{noun.0}} name",
+      REQ_ACTIVITY_DURATION: "And how long will {{var.0}} take to {{verb.0}}?",
       REQ_ADD_ANOTHER_PROMPT: "Ok. Would you like to add another {{noun.0}}?"
     },
     parse (reqSpeech, varList=[]) {
       let base = (this.speeches[reqSpeech]) ? this.speeches[reqSpeech] : "Speech Undefined"
       for (let [index, noun] of this.subs.nouns.entries()) {
-        base = base.replace(`{{noun.${index}}}`, noun)
+        let regexp = new RegExp(`{{noun.${index}}}`, 'g')
+        base = base.replace(regexp, noun)
       }
       for (const [index, verb] of this.subs.verbs.entries()) {
-        base = base.replace(`{{verb.${index}}}`, verb)
+        let regexp = new RegExp(`{{verb.${index}}}`, 'g')
+        base = base.replace(regexp, verb)
       }
       for (const [index, varItem] of varList.entries()) {
-        base = base.replace(`{{var.${index}}}`, varItem)
+        let regexp = new RegExp(`{{var.${index}}}`, 'g')
+        base = base.replace(regexp, varItem)
       }
       return base
     }

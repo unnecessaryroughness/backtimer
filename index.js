@@ -6,6 +6,7 @@ const Axios = require('axios')
 
 const backtimer = require('./backtimer.js')
 const speechResponses = require('./speechresponses')
+const sessionHandler = require('./sessionhandler')
 
 const SKILL_NAME = 'Backtimer';
 const HELP_MESSAGE = 'You can say "plan a meal", or, you can say "exit"... What can I help you with?';
@@ -86,15 +87,44 @@ const SetBacktimerHandler = {
   },
   handle(handlerInput) {
     let request = handlerInput.requestEnvelope.request;
+    let sessionAttributes = sessionHandler.getSession(handlerInput)
     let intentSpeechResponses = speechResponses(request.intent.name)
-    console.log(JSON.stringify(intentSpeechResponses, null, 2))
+    let speechText = intentSpeechResponses.parse('REQ_ACTIVITY_NAME', ['first'])
+    console.log('speechText: ', speechText)
+    
+    sessionAttributes.reset()
+    console.log(sessionAttributes.stringify())
+    sessionHandler.updateSession(handlerInput, sessionAttributes)
+
     return handlerInput.responseBuilder
-      .speak(`this is the ${request.intent.name} handler`)
-      .withSimpleCard(SKILL_NAME, `$(request.intent.name)`)
+      .speak(speechText)
+      .reprompt(speechText)
+      .withSimpleCard(SKILL_NAME, speechText)
       .getResponse();
   }
 }
 
+
+const ActivityTypeHandler = {
+  canHandle(handlerInput) {
+    let request = handlerInput.requestEnvelope.request;
+    return request.type === 'IntentRequest'
+      && request.intent.name === 'ActivityTypeIntent'
+  },
+  handle(handlerInput) {
+    let request = handlerInput.requestEnvelope.request
+    let sessionAttributes = sessionHandler.getSession(handlerInput)
+    let intentSpeechResponses = speechResponses(request.intent.name)
+
+    let speechText = "temporary message for activity type handlers"
+
+    return handlerInput.responseBuilder
+      .speak(speechText)
+      .reprompt(speechText)
+      .withSimpleCard(SKILL_NAME, speechText)
+      .getResponse()
+  }
+}
 
 const HelpHandler = {
   canHandle(handlerInput) {
@@ -154,6 +184,7 @@ exports.handler = skillBuilder
   .addRequestHandlers(
     SetAlarmHandler,
     SetBacktimerHandler,
+    ActivityTypeHandler,
     HelpHandler,
     ExitHandler,
     SessionEndedRequestHandler
