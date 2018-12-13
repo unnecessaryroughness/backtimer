@@ -1,4 +1,4 @@
-bt = require("./backtimer")
+bt = require("../lib/backtimer")
 
 console.log("\n+++++++++++++++++++++\n")
 

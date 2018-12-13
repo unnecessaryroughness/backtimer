@@ -1,4 +1,4 @@
-sr = require("./speechresponses")
+sr = require("../lib/speechresponses")
 
 console.log("\n+++++++++++++++++++++\n")
 
