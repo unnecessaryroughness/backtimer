@@ -55,6 +55,7 @@ const ActivityTypeHandler = {
     let activityFound = request.intent.slots.ActivityType.value
   
     sessionAttributes
+      .addActivity()
       .updateActivity(activityFound)
       .addBreadcrumb(`Activity Type`)
     
@@ -119,7 +120,6 @@ const YesHandler = {
       case 'Duration':
         sessionAttributes
           .addBreadcrumb(`Add Another Activity Type`)
-          .addActivity()
           speechText = intentSpeechResponses.parse('REQ_ACTIVITY_NAME', ['next'])
           break;
 
@@ -127,9 +127,37 @@ const YesHandler = {
         sessionAttributes.addBreadcrumb(`Confirm Reminders`)
         speechText = speechResponses(sessionAttributes.intentType).parse('REQ_SET_REMINDERS_NOW')      
         break;
-    
+
+      case 'Confirm Alarm Schedule':
+        return new Promise((resolve, reject) => {
+          sessionAttributes.addBreadcrumb(`Set Alarms`)
+          let {apiEndpoint, apiAccessToken} = handlerInput.requestEnvelope.context.System
+      
+          alarmHandler(sessionAttributes.activityList, apiEndpoint, apiAccessToken)
+            .then(alarms => {
+              console.log(JSON.stringify(alarms, null, 2))
+              speechText = speechResponses(sessionAttributes.intentType).parse('CFM_REMINDERS_SET')  
+              speechText += speechResponses(sessionAttributes.intentType).parse('SAY_GOODBYE')  
+              resolve(handlerInput.responseBuilder
+                .speak(speechText)
+                .withSimpleCard(SKILL_NAME, speechText)
+                .getResponse())
+            })
+            .catch(err => {
+              console.log('in the catch routine...')
+              console.log(JSON.stringify(err, null, 2))
+              speechText = speechResponses(sessionAttributes.intentType).parse('CFM_REMINDERS_FAILED')  
+              speechText += speechResponses(sessionAttributes.intentType).parse('SAY_GOODBYE')  
+              resolve(handlerInput.responseBuilder
+                .speak(speechText)
+                .withSimpleCard(SKILL_NAME, speechText)
+                .getResponse())
+            })
+        })
+        break;
+
       default: 
-        speechText = "previous breadcrumb was " + previousBreadcrumb 
+        speechText = "You said Yes out of context. Previous breadcrumb was " + previousBreadcrumb 
         break;
     }
       
@@ -159,13 +187,10 @@ const NoHandler = {
   
     switch (previousBreadcrumb) {
       case 'Duration':
-        sessionAttributes
-          .addBreadcrumb(`No More Activity Types`)
-          
+        sessionAttributes.addBreadcrumb(`No More Activity Types`)
         let schedule = backtimer(sessionAttributes.activityList)
         sessionAttributes.activityList = schedule.activities
         let longest = schedule.longestActivity
-        
         console.log(schedule)
     
         speechText =  intentSpeechResponses.parse('TELL_LONGEST_ACTIVITY', [longest.name, longest.duration])
@@ -187,7 +212,13 @@ const NoHandler = {
         sessionAttributes.addBreadcrumb(`Say Goodbye`)
         speechText = speechResponses(sessionAttributes.intentType).parse('SAY_GOODBYE')      
         break;
-    
+
+      case 'Confirm Alarm Schedule':
+        sessionAttributes.addBreadcrumb(`Say Goodbye`)
+        speechText = speechResponses(sessionAttributes.intentType).parse('CFM_REMINDERS_CANCELLED')      
+        speechText += speechResponses(sessionAttributes.intentType).parse('SAY_GOODBYE')      
+        break;
+
       default: 
         speechText = "You said No out of context. previous breadcrumb was " + previousBreadcrumb 
         break;
@@ -211,49 +242,44 @@ const NowHandler = {
       && request.intent.name === 'NowIntent';
   },
   handle(handlerInput) {
-    // call function to set timers
-    return new Promise((resolve, reject) => {
-      let request = handlerInput.requestEnvelope.request
-      let sessionAttributes = sessionHandler.getSession(handlerInput)
-      let intentSpeechResponses = speechResponses(sessionAttributes.intentType)
-      let previousBreadcrumb = sessionAttributes.getNewestBreadcrumb() 
-      let speechText = 'now placeholder'
-      sessionAttributes.addBreadcrumb(`Set Alarms Immediately`)
+    let request = handlerInput.requestEnvelope.request
+    let sessionAttributes = sessionHandler.getSession(handlerInput)
+    let intentSpeechResponses = speechResponses(sessionAttributes.intentType)
+    let speechText = 'now placeholder'
+    sessionAttributes.addBreadcrumb(`Confirm Alarm Schedule`)
 
-      let {apiEndpoint, apiAccessToken} = handlerInput.requestEnvelope.context.System
-  
-      alarmHandler(sessionAttributes.activityList, apiEndpoint, apiAccessToken)
-        .then(alarms => {
-          console.log(JSON.stringify(alarms, null, 2))
-          speechText = speechResponses(sessionAttributes.intentType).parse('CFM_REMINDERS_SET')  
-          speechText += speechResponses(sessionAttributes.intentType).parse('SAY_GOODBYE')  
-          resolve(handlerInput.responseBuilder
-            .speak(speechText)
-            .withSimpleCard(SKILL_NAME, speechText)
-            .getResponse())
-        })
-        .catch(err => {
-          console.log('in the catch routine...')
-          console.log(JSON.stringify(err, null, 2))
-          speechText = speechResponses(sessionAttributes.intentType).parse('CFM_REMINDERS_FAILED')  
-          speechText += speechResponses(sessionAttributes.intentType).parse('SAY_GOODBYE')  
-          resolve(handlerInput.responseBuilder
-            .speak(speechText)
-            .withSimpleCard(SKILL_NAME, speechText)
-            .getResponse())
-        })
-    })
+    speechText = speechResponses(sessionAttributes.intentType).parse('REQ_PLAYBACK_REMINDERS_1', 
+                  [sessionAttributes.activityList.length, sessionAttributes.activityList.length > 1 ? "s" : ""])
+    
+    for (let activity of sessionAttributes.activityList) {
+      let phrase = activity.startsecs > 0 ?  'REQ_PLAYBACK_REMINDERS_2b' : 'REQ_PLAYBACK_REMINDERS_2a'
+      let mins = activity.startsecs/60
+      speechText += speechResponses(sessionAttributes.intentType).parse(phrase, [activity.name, mins, mins > 1 ? 's' : ''])
+    }
+    
+    speechText += speechResponses(sessionAttributes.intentType).parse('REQ_PLAYBACK_REMINDERS_3')
+
+    return handlerInput.responseBuilder
+      .speak(speechText)
+      .reprompt(speechText)
+      .withSimpleCard(SKILL_NAME, speechText)
+      .getResponse();
   }
 }
 
 
 const LaterHandler = {
   // write data to DDB that can be recovered later
+  // save session.user.userId along with the name of the longest ingredient 
+  // update lambda service role to allow access to a single DDB table 
+  // ensure a single user can't store more than three concurrent schedules in the table
+  // put a TTL on each DDB record for housekeeping
 }
 
 const StartHandler = {
-  // retrieve data from DDB
+  // retrieve data from DDB using session.user.userId and spoken name of longest ingredient
   // call function to set timers
+  // remove data from DDB if successful
 }
 
 const HelpHandler = {

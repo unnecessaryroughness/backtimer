@@ -28,16 +28,29 @@ The process is essentially the same for both modes; just the terminology changes
           "If you follow these instructions then everything should be completed at the same time."
           "Would you like me to set reminders for the start of each activity?"
 15.  "yes"
-16.       "Ok. I will set r reminders for you"
+          "Would you like me to set the reminders now, or later?"
+16.  "now"
+17.       "Ok. I will set r reminders for you"
           "xyz, in nn minutes"
           "abc, in nn-mm minutes"
           "Is that ok?"
-17.  "yes" 
-18.       "Ok. I have saved this meal plan for you. When you are ready to start, say Alexa ask backtimer to start xyz"
-19.  "Alexa, ask backtimer to start xyz"
-20.       "Ok. I have set r reminders for you"
+18.  "yes"
+19.       "Your reminders have been set"
+          "Thank you for using backtimer. Goodbye."
+
+ALTERNATIVE FLOW
+================
+
+16.  "later"
+17.       "Ok. I have saved this meal plan for you. When you are ready to start, say Alexa ask backtimer to start xyz"
+          "Thank you for using backtimer. Goodbye."
+18.  "Alexa, ask backtimer to start xyz"
+17.       "Ok. I will set r reminders for you"
           "xyz, in nn minutes"
           "abc, in nn-mm minutes"
-          "Good luck! And thanks for using Backtimer."
+          "Is that ok?"
+18.  "yes"
+19.       "Your reminders have been set"
+          "Thank you for using backtimer. Goodbye."
  
 
