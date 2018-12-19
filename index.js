@@ -18,15 +18,17 @@ const UNHANDLED_MESSAGE = "I didn't understand that instruction. Did you mean to
 const SetBacktimerHandler = {
   canHandle(handlerInput) {
     let request = handlerInput.requestEnvelope.request;
-    return request.type === 'IntentRequest'
+    return request.type === 'LaunchRequest'
+      || request.type === 'IntentRequest'
       && ['SetMealTimer','SetBackTimer'].includes(request.intent.name);
   },
   handle(handlerInput) {
     let request = handlerInput.requestEnvelope.request;
     let sessionAttributes = sessionHandler.getSession(handlerInput)
-    
+    let intentType = request.type == 'LaunchRequest' ? 'SetMealTimer' : request.intent.name
+
     sessionAttributes
-      .reset(request.intent.name)
+      .reset(intentType)
       .addBreadcrumb('Init')
     
     let speechText = speechResponses(sessionAttributes.intentType).parse('REQ_ACTIVITY_NAME', ['first'])
