@@ -1,5 +1,4 @@
-const constants = require('./commonconstants')
-const {configHandler, sessionHandler, speechResponses} = constants('../')
+const {configHandler, sessionHandler, speechResponses} = require('./commonconstants')()
 const skillName = configHandler.get('AlexaSkillSettings', 'SKILL_NAME', "[Skill Name]")
 
 module.exports = {

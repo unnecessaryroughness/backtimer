@@ -1,5 +1,4 @@
-const constants = require('./commonconstants')
-const {configHandler} = constants('../')
+const {configHandler} = require('./commonconstants')()
 const errorOccurred = configHandler.get('AlexaEventSpeech', 'ERROR_OCCURRED', "Speech Undefined") 
 const errorOccurredReprompt = configHandler.get('AlexaEventSpeech', 'ERROR_OCCURRED_REPROMPT', "Speech Undefined")
 

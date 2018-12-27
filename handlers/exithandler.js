@@ -1,5 +1,4 @@
-const constants = require('./commonconstants')
-const {configHandler} = constants('../')
+const {configHandler} = require('./commonconstants')()
 const stopMessage = configHandler.get('AlexaEventSpeech', 'STOP_MESSAGE', "Speech Undefined")
 const skillName = configHandler.get('AlexaSkillSettings', 'SKILL_NAME', "[Skill Name]")
 

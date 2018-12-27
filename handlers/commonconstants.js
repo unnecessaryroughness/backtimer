@@ -1,4 +1,4 @@
-module.exports = (pathToRoot = './') => {
+module.exports = (pathToRoot = '../') => {
     return {
         backtimer: require(`${pathToRoot}lib/backtimer`),
         speechResponses: require(`${pathToRoot}lib/speechresponses`),
