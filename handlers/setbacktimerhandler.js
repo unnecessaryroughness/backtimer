@@ -1,5 +1,6 @@
 const constants = require('./commonconstants')
-const {sessionHandler, speechResponses, SKILL_NAME} = constants('../')
+const {configHandler, sessionHandler, speechResponses} = constants('../')
+const skillName = configHandler.get('AlexaSkillSettings', 'SKILL_NAME', "[Skill Name]")
 
 module.exports = {
     canHandle(handlerInput) {
@@ -24,7 +25,7 @@ module.exports = {
       return handlerInput.responseBuilder
         .speak(speechText)
         .reprompt(speechText)
-        .withSimpleCard(SKILL_NAME, speechText)
+        .withSimpleCard(skillName, speechText)
         .getResponse();
     }
   }

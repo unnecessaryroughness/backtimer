@@ -1,17 +1,19 @@
 const constants = require('./commonconstants')
-const {speechResponses, SKILL_NAME} = constants('../')
+const {configHandler} = constants('../')
+const skillName = configHandler.get('AlexaSkillSettings', 'SKILL_NAME', "[Skill Name]")
+const helpMessage = configHandler.get('AlexaEventSpeech', 'HELP_MESSAGE', "[Skill Name]")
+const helpMessageReprompt = configHandler.get('AlexaEventSpeech', 'HELP_REPROMPT', "[Skill Name]")
 
 module.exports = {
     canHandle(handlerInput) {
-      const request = handlerInput.requestEnvelope.request;
-      return request.type === 'IntentRequest'
-        && request.intent.name === 'AMAZON.HelpIntent';
+      const request = handlerInput.requestEnvelope.request
+      return request.type === 'IntentRequest' && request.intent.name === 'AMAZON.HelpIntent'
     },
     handle(handlerInput) {
       return handlerInput.responseBuilder
-        .speak(HELP_MESSAGE)
-        .reprompt(HELP_REPROMPT)
-        .withSimpleCard(SKILL_NAME, speechText)
+        .speak(helpMessage)
+        .reprompt(helpMessageReprompt)
+        .withSimpleCard(skillName, helpMessage)
         .getResponse();
     },
-  };
+  }

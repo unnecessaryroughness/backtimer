@@ -1,5 +1,6 @@
 const constants = require('./commonconstants')
-const {speechResponses, SKILL_NAME} = constants('../')
+const {configHandler, speechResponses} = constants('../')
+const skillName = configHandler.get('AlexaSkillSettings', 'SKILL_NAME', "[Skill Name]")
 
 module.exports = {
     // write data to DDB that can be recovered later
