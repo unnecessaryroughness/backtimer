@@ -18,7 +18,9 @@ module.exports = {
         .addBreadcrumb('Init')
       
       let speechText = speechResponses(sessionAttributes.intentType).parse('REQ_ACTIVITY_NAME', ['first'])
-  
+      
+      console.log('about to write to state in setbacktimer handler', sessionAttributes)
+
       sessionHandler.updateSession(handlerInput, sessionAttributes)
   
       return handlerInput.responseBuilder

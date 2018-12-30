@@ -12,6 +12,7 @@ module.exports = {
       let intentSpeechResponses = speechResponses(sessionAttributes.intentType)
       let activityFound = request.intent.slots.ActivityType.value
     
+      console.log(`retrieved from session for activity type handler`, sessionAttributes)
       sessionAttributes
         .addActivity()
         .updateActivity(activityFound)

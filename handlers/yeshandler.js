@@ -31,7 +31,7 @@ module.exports = {
             sessionAttributes.addBreadcrumb(`Set Alarms`)
             let {apiEndpoint, apiAccessToken} = handlerInput.requestEnvelope.context.System
         
-            alarmHandler(sessionAttributes.activityList, apiEndpoint, apiAccessToken)
+            alarmHandler(sessionAttributes.activityList, sessionAttributes.waitSeconds, apiEndpoint, apiAccessToken)
               .then(alarms => {
                 console.log(JSON.stringify(alarms, null, 2))
                 speechText = speechResponses(sessionAttributes.intentType).parse('CFM_REMINDERS_SET')  
