@@ -1,7 +1,5 @@
-const {configHandler} = require('./commonconstants')()
+const {configHandler, speechResponses, sessionHandler} = require('./commonconstants')()
 const skillName = configHandler.get('AlexaSkillSettings', 'SKILL_NAME', "[Skill Name]")
-const helpMessage = configHandler.get('AlexaEventSpeech', 'HELP_MESSAGE', "[Skill Name]")
-const helpMessageReprompt = configHandler.get('AlexaEventSpeech', 'HELP_REPROMPT', "[Skill Name]")
 
 module.exports = {
     canHandle(handlerInput) {
@@ -9,10 +7,18 @@ module.exports = {
       return request.type === 'IntentRequest' && request.intent.name === 'AMAZON.HelpIntent'
     },
     handle(handlerInput) {
+      const helpSpeech = this.parseHelp(sessionHandler.getSession(handlerInput))
       return handlerInput.responseBuilder
-        .speak(helpMessage)
-        .reprompt(helpMessageReprompt)
-        .withSimpleCard(skillName, helpMessage)
+        .speak(helpSpeech)
+        .reprompt(helpSpeech)
+        .withSimpleCard(skillName, helpSpeech)
         .getResponse();
     },
-  }
+    parseHelp(sessionAttributes) {
+      let lastBreadcrumb = sessionAttributes.getNewestBreadcrumb().toUpperCase().replace(/ /g, '_')
+      let intentSpeechResponses = speechResponses(sessionAttributes.intentType)
+      console.log(lastBreadcrumb)
+      speechText = intentSpeechResponses.parse(`LAST_BREADCRUMB_${lastBreadcrumb}`, [], 'AlexaHelpPrompts')
+      return speechText
+    }
+}
