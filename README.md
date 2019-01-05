@@ -42,7 +42,7 @@ The process is essentially the same for both modes; just the terminology changes
     "Would you like me to set reminders for the start of each activity?"
 
 15. "yes"
-    ​     "Would you like me to set the reminders to finish by a certain time, start immediately, or start sometime later?"
+    ​     "Would you like me to set the reminders to finish by a certain time, start immediately, or to finish by a certain time?"
 
 16. "immediately"
 
