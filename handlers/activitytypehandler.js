@@ -1,11 +1,10 @@
-const constants = require('./commonconstants')
-const {sessionHandler, speechResponses, SKILL_NAME} = constants('../')
+const {configHandler, sessionHandler, speechResponses} = require('./commonconstants')()
+const skillName = configHandler.get('AlexaSkillSettings', 'SKILL_NAME', "[Skill Name]")
 
 module.exports = {
     canHandle(handlerInput) {
       let request = handlerInput.requestEnvelope.request;
-      return request.type === 'IntentRequest'
-        && request.intent.name === 'ActivityTypeIntent'
+      return request.type === 'IntentRequest' && request.intent.name === 'ActivityTypeIntent'
     },
     handle(handlerInput) {
       let request = handlerInput.requestEnvelope.request
@@ -13,6 +12,7 @@ module.exports = {
       let intentSpeechResponses = speechResponses(sessionAttributes.intentType)
       let activityFound = request.intent.slots.ActivityType.value
     
+      console.log(`retrieved from session for activity type handler`, sessionAttributes)
       sessionAttributes
         .addActivity()
         .updateActivity(activityFound)
@@ -20,12 +20,12 @@ module.exports = {
       
       sessionHandler.updateSession(handlerInput, sessionAttributes)
   
-      let speechText = intentSpeechResponses.parse('REQ_ACTIVITY_DURATION', [activityFound])
+      const speechText = intentSpeechResponses.parse('REQ_ACTIVITY_DURATION', [activityFound])
   
       return handlerInput.responseBuilder
         .speak(speechText)
         .reprompt(speechText)
-        .withSimpleCard(SKILL_NAME, speechText)
+        .withSimpleCard(skillName, speechText)
         .getResponse()
     }
   }

@@ -1,16 +1,16 @@
-const constants = require('./commonconstants')
-const {speechResponses, SKILL_NAME} = constants('../')
+const {configHandler} = require('./commonconstants')()
+const errorOccurred = configHandler.get('AlexaEventSpeech', 'ERROR_OCCURRED', "Speech Undefined") 
+const errorOccurredReprompt = configHandler.get('AlexaEventSpeech', 'ERROR_OCCURRED_REPROMPT', "Speech Undefined")
 
 module.exports = {
     canHandle() {
       return true;
     },
     handle(handlerInput, error) {
-      console.log(`Error handled: ${error.message}`);
-  
+      console.log(`Error handled: ${error.message}`)
       return handlerInput.responseBuilder
-        .speak('Sorry, an error occurred. Trust me, you don\'t want to know the details.')
-        .reprompt('Sorry, an error occurred.')
+        .speak(errorOccurred)
+        .reprompt(errorOccurredReprompt)
         .getResponse();
     },
   }

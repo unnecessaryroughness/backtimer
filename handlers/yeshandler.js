@@ -1,5 +1,5 @@
-const constants = require('./commonconstants')
-const {sessionHandler, speechResponses, alarmHandler, SKILL_NAME} = constants('../')
+const {configHandler, sessionHandler, speechResponses, alarmHandler} = require('./commonconstants')()
+const skillName = configHandler.get('AlexaSkillSettings', 'SKILL_NAME', "[Skill Name]")
 
 module.exports = {
     canHandle(handlerInput) {
@@ -31,14 +31,14 @@ module.exports = {
             sessionAttributes.addBreadcrumb(`Set Alarms`)
             let {apiEndpoint, apiAccessToken} = handlerInput.requestEnvelope.context.System
         
-            alarmHandler(sessionAttributes.activityList, apiEndpoint, apiAccessToken)
+            alarmHandler(sessionAttributes.activityList, sessionAttributes.waitSeconds, apiEndpoint, apiAccessToken)
               .then(alarms => {
                 console.log(JSON.stringify(alarms, null, 2))
                 speechText = speechResponses(sessionAttributes.intentType).parse('CFM_REMINDERS_SET')  
                 speechText += speechResponses(sessionAttributes.intentType).parse('SAY_GOODBYE')  
                 resolve(handlerInput.responseBuilder
                   .speak(speechText)
-                  .withSimpleCard(SKILL_NAME, speechText)
+                  .withSimpleCard(skillName, speechText)
                   .getResponse())
               })
               .catch(err => {
@@ -48,7 +48,7 @@ module.exports = {
                 speechText += speechResponses(sessionAttributes.intentType).parse('SAY_GOODBYE')  
                 resolve(handlerInput.responseBuilder
                   .speak(speechText)
-                  .withSimpleCard(SKILL_NAME, speechText)
+                  .withSimpleCard(skillName, speechText)
                   .getResponse())
               })
           })
@@ -64,7 +64,7 @@ module.exports = {
       return handlerInput.responseBuilder
         .speak(speechText)
         .reprompt(speechText)
-        .withSimpleCard(SKILL_NAME, speechText)
+        .withSimpleCard(skillName, speechText)
         .getResponse();
     }
   }

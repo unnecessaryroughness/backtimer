@@ -1,5 +1,5 @@
-const constants = require('./commonconstants')
-const {sessionHandler, speechResponses, SKILL_NAME} = constants('../')
+const {configHandler, sessionHandler, speechResponses} = require('./commonconstants')()
+const skillName = configHandler.get('AlexaSkillSettings', 'SKILL_NAME', "[Skill Name]")
 
 module.exports = {
     canHandle(handlerInput) {
@@ -18,13 +18,15 @@ module.exports = {
         .addBreadcrumb('Init')
       
       let speechText = speechResponses(sessionAttributes.intentType).parse('REQ_ACTIVITY_NAME', ['first'])
-  
+      
+      console.log('about to write to state in setbacktimer handler', sessionAttributes)
+
       sessionHandler.updateSession(handlerInput, sessionAttributes)
   
       return handlerInput.responseBuilder
         .speak(speechText)
         .reprompt(speechText)
-        .withSimpleCard(SKILL_NAME, speechText)
+        .withSimpleCard(skillName, speechText)
         .getResponse();
     }
   }

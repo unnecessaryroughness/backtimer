@@ -1,18 +1,19 @@
-const constants = require('./commonconstants')
-const {speechResponses, SKILL_NAME, STOP_MESSAGE} = constants('../')
+const {configHandler} = require('./commonconstants')()
+const stopMessage = configHandler.get('AlexaEventSpeech', 'STOP_MESSAGE', "Speech Undefined")
+const skillName = configHandler.get('AlexaSkillSettings', 'SKILL_NAME', "[Skill Name]")
 
 module.exports = {
     canHandle(handlerInput) {
-      const request = handlerInput.requestEnvelope.request;
+      const request = handlerInput.requestEnvelope.request
       return request.type === 'IntentRequest'
-        && (request.intent.name === 'AMAZON.CancelIntent'
-          || request.intent.name === 'AMAZON.StopIntent');
+        &&  (request.intent.name === 'AMAZON.CancelIntent'
+          || request.intent.name === 'AMAZON.StopIntent')
     },
     handle(handlerInput) {
       return handlerInput.responseBuilder
-        .speak(STOP_MESSAGE)
-        .withSimpleCard(SKILL_NAME, STOP_MESSAGE)
+        .speak(stopMessage)
+        .withSimpleCard(skillName, stopMessage)
         .getResponse();
     },
-  };
+  }
   
