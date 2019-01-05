@@ -1,18 +1,22 @@
-const {configHandler, speechResponses} = require('./commonconstants')()
+const {configHandler, speechResponses, sessionHandler} = require('./commonconstants')()
 const skillName = configHandler.get('AlexaSkillSettings', 'SKILL_NAME', "[Skill Name]")
-const unhandledMessage = configHandler.get('AlexaEventSpeech', 'UNHANDLED_MESSAGE', "Unhandled")
 
 module.exports = {
-    // Modify this to understand breadcrumbs and offer context sensitive help
-    canHandle(handlerInput) {
-      return true
-    },
-    handle(handlerInput) {
-      return handlerInput.responseBuilder
-        .speak(unhandledMessage)
-        .reprompt(unhandledMessage)
-        .withSimpleCard(skillName, unhandledMessage)
-        .getResponse();
-    },
-  };
-  
+  canHandle(handlerInput) {
+    return true
+  },
+  handle(handlerInput) {
+    const uhmSpeech = this.parseUHM(sessionHandler.getSession(handlerInput))
+    return handlerInput.responseBuilder
+      .speak(uhmSpeech)
+      .reprompt(uhmSpeech)
+      .withSimpleCard(skillName, uhmSpeech)
+      .getResponse();
+  },
+  parseUHM(sessionAttributes) {
+    let lastBreadcrumb = sessionAttributes.getNewestBreadcrumb().toUpperCase().replace(/ /g, '_')
+    let intentSpeechResponses = speechResponses(sessionAttributes.intentType)
+    speechText = intentSpeechResponses.parse(`LAST_BREADCRUMB_${lastBreadcrumb}`, [], 'AlexaUnhandledPrompts')
+    return speechText
+  }
+}
