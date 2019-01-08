@@ -16,21 +16,11 @@ module.exports = {
       let finishTimeFound = (request.intent.slots && request.intent.slots.FinishTime) ? request.intent.slots.FinishTime.value : null
       let longestMins = (activityList[0].duration)
       let delayCalcOutput = delayCalc(finishTimeFound, longestMins)
-      let {waitSeconds} = delayCalcOutput
+      let {waitSeconds, overridden, overriddenTime, fixedTime} = delayCalcOutput
 
-      console.log(`found FinishTime: `, finishTimeFound)
-      console.log(`delay calc output: \n`, JSON.stringify(delayCalcOutput, null, 2))
-      console.log(`waiting for ${waitSeconds}`)
-
-/*
-
-      TIDY ALL THIS UP
-
-      ALSO... WHAT IF THE TIME REQUESTED IS FEWER MINUTES AWAY THAN THE LONGEST DURATION?
-
-      NEED TO DEFAULT TO HOWEVER LONG THE LONGEST TASK TAKES
-
-*/
+      // console.log(`found FinishTime: `, finishTimeFound)
+      // console.log(`delay calc output: \n`, JSON.stringify(delayCalcOutput, null, 2))
+      // console.log(`waiting for ${waitSeconds}`)
 
       sessionAttributes
         .addBreadcrumb(`Confirm Alarm Schedule`)
@@ -38,7 +28,13 @@ module.exports = {
 
       sessionHandler.updateSession(handlerInput, sessionAttributes)
 
-      speechText = intentSpeechResponses.parse('REQ_PLAYBACK_REMINDERS_1', [activityList.length +1])
+      if (overridden) {
+        speechText = intentSpeechResponses.parse('WARN_NOT_ENOUGH_TIME', [overriddenTime, fixedTime]) 
+      } else {
+        speechText = intentSpeechResponses.parse('SAY_OK') 
+      }
+
+      speechText += intentSpeechResponses.parse('REQ_PLAYBACK_REMINDERS_1', [activityList.length +1])
       
       for (let activity of activityList) {
         let mins = ((activity.startsecs / 60) + (waitSeconds / 60)).toFixed(0)
@@ -49,7 +45,7 @@ module.exports = {
       if (waitSeconds === 0) {
         speechText += intentSpeechResponses.parse('REQ_PLAYBACK_REMINDERS_2c', [longestMins, (longestMins > 1) ? 's' : ''])
       } else {
-        speechText += intentSpeechResponses.parse('REQ_PLAYBACK_REMINDERS_2d', [delayCalcOutput.fixedTime])
+        speechText += intentSpeechResponses.parse('REQ_PLAYBACK_REMINDERS_2d', [fixedTime])
       }
 
       speechText += intentSpeechResponses.parse('REQ_PLAYBACK_REMINDERS_3')
