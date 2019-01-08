@@ -20,7 +20,6 @@ module.exports = {
           let schedule = backtimer(sessionAttributes.activityList)
           sessionAttributes.activityList = schedule.activities
           let longest = schedule.longestActivity
-          console.log(schedule)
       
           speechText =  intentSpeechResponses.parse('TELL_LONGEST_ACTIVITY', [longest.name, longest.duration])
           if (schedule.activities.length > 1) {

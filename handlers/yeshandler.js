@@ -33,7 +33,7 @@ module.exports = {
         
             alarmHandler(sessionAttributes.activityList, sessionAttributes.waitSeconds, apiEndpoint, apiAccessToken)
               .then(alarms => {
-                console.log(JSON.stringify(alarms, null, 2))
+                // console.log(JSON.stringify(alarms, null, 2))
                 speechText = speechResponses(sessionAttributes.intentType).parse('CFM_REMINDERS_SET')  
                 speechText += speechResponses(sessionAttributes.intentType).parse('SAY_GOODBYE')  
                 resolve(handlerInput.responseBuilder
@@ -42,8 +42,7 @@ module.exports = {
                   .getResponse())
               })
               .catch(err => {
-                console.log('in the catch routine...')
-                console.log(JSON.stringify(err, null, 2))
+                // console.log(JSON.stringify(err, null, 2))
                 speechText = speechResponses(sessionAttributes.intentType).parse('CFM_REMINDERS_FAILED')  
                 speechText += speechResponses(sessionAttributes.intentType).parse('SAY_GOODBYE')  
                 resolve(handlerInput.responseBuilder
