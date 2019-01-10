@@ -38,17 +38,17 @@ module.exports = {
   
         case 'No More Activity Types':
           sessionAttributes.addBreadcrumb(`Say Goodbye`)
-          speechText = speechResponses(sessionAttributes.intentType).parse('SAY_GOODBYE')      
+          speechText = intentSpeechResponses.parse('SAY_GOODBYE')      
           break;
   
         case 'Confirm Alarm Schedule':
           sessionAttributes.addBreadcrumb(`Say Goodbye`)
-          speechText = speechResponses(sessionAttributes.intentType).parse('CFM_REMINDERS_CANCELLED')      
-          speechText += speechResponses(sessionAttributes.intentType).parse('SAY_GOODBYE')      
+          speechText = intentSpeechResponses.parse('CFM_REMINDERS_CANCELLED')      
+          speechText += intentSpeechResponses.parse('SAY_GOODBYE')      
           break;
   
         default: 
-          speechText = "You said No out of context. previous breadcrumb was " + previousBreadcrumb 
+          speechText = intentSpeechResponses.parse(`NO_OUT_OF_CONTEXT`, [], 'AlexaUnhandledPrompts')
           break;
       }
       
