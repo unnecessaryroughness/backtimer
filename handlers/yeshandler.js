@@ -23,7 +23,7 @@ module.exports = {
   
         case 'No More Activity Types':
           sessionAttributes.addBreadcrumb(`Confirm Reminders`)
-          speechText = speechResponses(sessionAttributes.intentType).parse('REQ_SET_REMINDERS_NOW')      
+          speechText = intentSpeechResponses.parse('REQ_SET_REMINDERS_NOW')      
           break;
   
         case 'Confirm Alarm Schedule':
@@ -34,8 +34,8 @@ module.exports = {
             alarmHandler(sessionAttributes.activityList, sessionAttributes.waitSeconds, apiEndpoint, apiAccessToken)
               .then(alarms => {
                 // console.log(JSON.stringify(alarms, null, 2))
-                speechText = speechResponses(sessionAttributes.intentType).parse('CFM_REMINDERS_SET')  
-                speechText += speechResponses(sessionAttributes.intentType).parse('SAY_GOODBYE')  
+                speechText = intentSpeechResponses.parse('CFM_REMINDERS_SET')  
+                speechText += intentSpeechResponses.parse('SAY_GOODBYE')  
                 resolve(handlerInput.responseBuilder
                   .speak(speechText)
                   .withSimpleCard(skillName, speechText)
@@ -43,8 +43,19 @@ module.exports = {
               })
               .catch(err => {
                 // console.log(JSON.stringify(err, null, 2))
-                speechText = speechResponses(sessionAttributes.intentType).parse('CFM_REMINDERS_FAILED')  
-                speechText += speechResponses(sessionAttributes.intentType).parse('SAY_GOODBYE')  
+                switch (parseInt(err[err.length-1].status)) {
+                  case 401:
+                    speechText = intentSpeechResponses.parse('CFM_REMINDERS_FAILED_UNAUTHORIZED')  
+                    break;
+                  case 403: 
+                    speechText = intentSpeechResponses.parse('CFM_REMINDERS_FAILED_UNSUPPORTED')  
+                    break;
+                  default:
+                    speechText = intentSpeechResponses.parse('CFM_REMINDERS_FAILED_DEFAULT')  
+                }
+                
+                speechText += intentSpeechResponses.parse('SAY_GOODBYE')  
+                
                 resolve(handlerInput.responseBuilder
                   .speak(speechText)
                   .withSimpleCard(skillName, speechText)
@@ -54,7 +65,7 @@ module.exports = {
           break;
   
         default: 
-          speechText = "You said Yes out of context. Previous breadcrumb was " + previousBreadcrumb 
+          speechText = intentSpeechResponses.parse(`YES_OUT_OF_CONTEXT`, [], 'AlexaUnhandledPrompts')
           break;
       }
         
